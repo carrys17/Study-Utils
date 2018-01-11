@@ -1,7 +1,7 @@
-
+﻿
 import java.security.MessageDigest;
 
-public class MD5Util {
+public class MD5Utils {
 	// 对字符串采用MD5加密
 	public static String MD5Encode(String inStr) throws Exception {
 
