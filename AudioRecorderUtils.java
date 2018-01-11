@@ -1,4 +1,4 @@
-package com.example.shang.study_utils;
+﻿package com.example.shang.study_utils;
 
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -19,7 +19,7 @@ public class AudioRecorderUtils {
     private String FolderPath;
 
     private MediaRecorder mMediaRecorder;
-    private final String TAG = "fan";
+    private final String TAG = "xyz";
     public static final int MAX_LENGTH = 1000 * 60 * 10;// 最大录音时长1000*60*10;
 
     private OnAudioStatusUpdateListener audioStatusUpdateListener;
