@@ -1,4 +1,4 @@
-﻿package com.example.admin.locationdemo;
+package com.example.admin.locationdemo;
 
 import android.util.Log;
 
@@ -88,67 +88,113 @@ public class LocationUtils {
 
 
     /**
-     * 根据ip通过百度api去获取城市
+     * 根据ip通过百度地图api去获取城市
      * @param ip
      * @return
      */
-    public static String Ip2LocationByBaiduApi(String ip){
+    public static String Ip2LocationByBaiduApi(String ip) {
         try {
-            URL url = new URL("http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&ip=" + ip);
-            URLConnection connection = url.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
+            URL url = new URL("http://api.map.baidu.com/location/ip?ak=F454f8a5efe5e577997931cc01de3974&ip=" + ip);
+            URLConnection conn = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
             String line = null;
-            StringBuffer res = new StringBuffer();
-            while ((line = reader.readLine())!=null){
-                res.append(line);
+            StringBuffer result = new StringBuffer();
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
             }
             reader.close();
-            String ipAddr = res.toString();
-            if (StringUtils.isJSONString(ipAddr)){
-                JSONObject jsonObject = new JSONObject(ipAddr);
-                if ("1".equals(jsonObject.get("ret").toString())){
-                    return jsonObject.get("city").toString();
-                }else {
+            String ipAddr = result.toString();
+            try {
+                JSONObject obj1 = new JSONObject(ipAddr);
+                if ("0".equals(obj1.get("status").toString())) {
+                    JSONObject obj2 = new JSONObject(obj1.get("content").toString());
+                    JSONObject obj3 = new JSONObject(obj2.get("address_detail").toString());
+                    return obj3.get("city").toString();
+                } else {
                     return "读取失败";
                 }
-
-            }else {
-                return "访问后得到的不是json数据, res -- "+ipAddr;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return "读取失败";
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return "读取失败 e -- "+e.getMessage();
+
         } catch (IOException e) {
-            e.printStackTrace();
-            return "读取失败 e -- "+e.getMessage();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return "读取失败 e -- "+e.getMessage();
+            return "读取失败";
         }
     }
 
 
- 	/**
-         * 计算两个坐标点之间的距离
-         *
-         * @param firstLatitude   第一个坐标的纬度
-         * @param firstLongitude  第一个坐标的经度
-         * @param secondLatitude  第二个坐标的纬度
-         * @param secondLongitude 第二个坐标的经度
-         * @return 返回两点之间的距离，单位：m
-         */
-        public static double getDistance(double firstLatitude, double firstLongitude,
-                                         double secondLatitude, double secondLongitude) {
-            double firstRadLat = rad(firstLatitude);
-            double firstRadLng = rad(firstLongitude);
-            double secondRadLat = rad(secondLatitude);
-            double secondRadLng = rad(secondLongitude);
+    //http://pv.sohu.com/cityjson?ie=utf-8&ip=113.111.245.219
+    // var returnCitySN = {"cip": "113.111.245.219", "cid": "440100", "cname": "广东省广州市"};
+    public static String Ip2LocationBySohu(String ip) {
+        try {
+            URL url = new URL("http://pv.sohu.com/cityjson?ie=utf-8&ip=" + ip);
+            URLConnection conn = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+            String line = null;
+            StringBuffer result = new StringBuffer();
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            reader.close();
+            String ipAddr = result.toString();
+            int left = ipAddr.indexOf("省");
+            int right = ipAddr.indexOf("市");
+            String city = ipAddr.substring(left + 1, right+1);
+            return city;
 
-            double a = firstRadLat - secondRadLat;
-            double b = firstRadLng - secondRadLng;
-            double cal = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(firstRadLat)
-                    * Math.cos(secondRadLat) * Math.pow(Math.sin(b / 2), 2))) * EarthRadius;
-            double result = Math.round(cal * 10000d) * 1000d / 10000d ;
-            return result;
+        } catch (UnsupportedEncodingException e1) {
+            e1.printStackTrace();
+            return "读取失败";
+        } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+            return "读取失败";
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return "读取失败";
         }
+    }
+
+    // /**/jQuery110206955700272228569_1433922418817({"status":"0","t":"1433922612109","set_cache_time":"","data":[{"location":"广东省广州市 联通", "titlecont":"IP地址查询", "origip":"112.96.199.156", "origipquery":"112.96.199.156", "showlamp":"1", "showLikeShare":1, "shareImage":1, "ExtendedLocation":"", "OriginQuery":"112.96.199.156", "tplt":"ip", "resourceid":"6006", "fetchkey":"112.96.199.156", "appinfo":"", "role_id":0, "disp_type":0}]});
+    public static String Ip2LocationByBaiduWeb(String ip) {
+        try {
+            // https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=112.96.199.156&co=&resource_id=6006&t=1433922612109&ie=utf8&oe=gbk&cb=op_aladdin_callback&format=json&tn=baidu&cb=jQuery110206955700272228569_1433922418817&_=1433922418822
+
+            // 简化后的https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=123.123.192.255&co=&resource_id=6006&t=1433922612109&ie=utf8&oe=utf-8&format=json&tn=baidu
+            // 需要ip和时间戳
+            long time = System.currentTimeMillis();
+            URL url = new URL("https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query=" + ip
+            +"&co=&resource_id=6006&t="+time+"&ie=utf8&oe=utf-8&format=json&tn=baidu");
+            URLConnection conn = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+            String line = null;
+            StringBuffer result = new StringBuffer();
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+
+            reader.close();
+            String ipAddr = result.toString();
+            ipAddr = new String(ipAddr.getBytes(),"utf-8");
+            Log.i("location", "Ip2LocationByBaiduWeb: result -- "+ipAddr);
+            int left = ipAddr.indexOf("省");
+            int right = ipAddr.indexOf("市");
+            String city = ipAddr.substring(left + 1, right+1);// 广州市
+            return city;
+
+        } catch (UnsupportedEncodingException e1) {
+            e1.printStackTrace();
+            return "读取失败";
+        } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+            return "读取失败";
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return "读取失败";
+        }
+    }
+
+
+
+
 }
