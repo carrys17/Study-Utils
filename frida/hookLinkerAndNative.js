@@ -117,10 +117,10 @@ function hooklinker() {
 
                 
 
-                        var pthead_create_check_addr = libnetprotect_addr.add(0x1234 + 1); 
+                        var pthead_create_check_addr = libmain_addr.add(0x1234 + 1); 
                         console.log("pthead_create_check_addr is: " + pthead_create_check_addr)
                    
-                        //   int __fastcall sub_60F7C(int a1, int a2, int a3, int a4)
+                        //   int __fastcall sub_1234(int a1, int a2, int a3, int a4)
                         var pthead_create_check_function = new NativeFunction(pthead_create_check_addr, 'int', ['int','int','int','int']);
                         Interceptor.replace(pthead_create_check_function, new NativeCallback(function () {
                             console.log("enter pthead_create_check_function hook function");
